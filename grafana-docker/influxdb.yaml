@@ -1,0 +1,12 @@
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb2
+    volumes:
+      - /mnt/influxdb/data:/var/lib/influxdb2:rw
+#    env_file:
+#      - .env
+#    entrypoint: ["./entrypoint.sh"]
+    ports:
+      - 8086:8086
+    restart: unless-stopped
