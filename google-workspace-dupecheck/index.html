@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Admin CSV Multiple Account Check</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #444;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            width: 97%;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #555;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .statistics {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .statistics p {
+            font-size: 18px;
+            margin: 5px 0;
+            color: #007bff;
+        }
+
+        .statistics p span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Google Admin CSV Multiple Account Check</h2>
+        <input type="file" id="csvFile" accept=".csv">
+        <button onclick="processCSV()">Check for Multiple Accounts</button>
+
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email Addresses</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <div class="statistics">
+            <p>Users with Multiple Accounts: <span id="usersWithMultipleAccounts">0</span></p>
+            <p>Total Multiple Accounts: <span id="totalMultipleAccounts">0</span></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
