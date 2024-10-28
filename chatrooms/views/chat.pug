@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  .page-header
+    .row
+      .col-sm-12
+        h4(class='pull-left' id='chatroom_title')
+        p(class='pull-right' id='sharelink')
+          label(for='sharethis')
+          input#sharethis(type='text', value='')
+          button(data-copytarget='#sharethis') share
+    div(id='chatlog')
+    br 
+    form.form-horizontal(action='javascript:void(0)')
+      input(type='hidden', id='csrf', name='_csrf', value=_csrf)
+      .form-group
+        .col-sm-12
+          input.form-control(type='text', name='message', id='message', placeholder='Message', autocomplete='off', autofocus)
+          input.form-control(type='hidden', name='username', id='username', placeholder='username', value=user.profile.name)
+
+      .form-group
+        .col-sm-12
+          button.col-sm-3.btn.btn-primary(type='submit' class='pull-right' onclick='sendMessage()')
+            i.fa.fa-envelope
+            | Send
+          button.col-sm-3.btn.btn-warning(onclick='removeChatroom()')
+            i.fa.fa-trash
+            | Destroy
+          div(id='loading')
+            i(class='fa fa-cog fa-spin fa-3x fa-fw')
+
+
+    br
+
+  script(src='/js/chat.js')
+  script(src='/js/lightbox.js')
