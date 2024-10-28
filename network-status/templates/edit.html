@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Status - Edit Host</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+{% include 'navbar.html' %}
+<div class="container">
+    <h1 class="mt-5">Edit Host</h1>
+    <form method="POST">
+        <div class="input-group mt-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="ip">IP Address</label>
+            </div>
+            <input type="text" class="form-control" id="ip" name="ip" value="{{ ip }}" required>
+        </div>
+        <div class="form-row mt-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="hostname">Hostname</label>
+                    </div>
+                    <input type="text" class="form-control" id="hostname" name="hostname" value="{{ hostname }}">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="category">Category</label>
+                    </div>
+                    <input type="text" class="form-control" id="category" name="category" value="{{ category }}">
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Save Host</button>
+    </form>
+</div>
+</body>
+</html>

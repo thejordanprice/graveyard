@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Status</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var el = document.getElementById('ip-list');
+            var sortable = Sortable.create(el, {
+                disabled: true,
+                onEnd: function (evt) {
+                    var order = sortable.toArray();
+                    fetch('/save', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ order: order }),
+                    });
+                },
+                dataIdAttr: 'data-ip-id'
+            });
+    
+            function fetchLatestPingResults() {
+                fetch('/results')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelectorAll('#ip-list tr').forEach(row => {
+                            const ipId = row.getAttribute('data-ip-id');
+                            const responseTimeCell = row.querySelector('.response-time-cell');
+                            const timestampCell = row.querySelector('.timestamp-cell');
+                            if (data[ipId]) {
+                                responseTimeCell.textContent = data[ipId]['response_time'];
+                                timestampCell.textContent = data[ipId]['timestamp'];
+                            } else {
+                                responseTimeCell.textContent = 'No data';
+                                timestampCell.textContent = 'No data';
+                            }
+                        });
+                    });
+            }
+    
+            setInterval(fetchLatestPingResults, 5000);
+    
+            const categoryFilter = document.getElementById('category-filter');
+            const rows = document.querySelectorAll('#ip-list tr');
+    
+            categoryFilter.addEventListener('change', function () {
+                const selectedCategory = categoryFilter.value;
+    
+                rows.forEach(row => {
+                    const category = row.getAttribute('data-category');
+    
+                    if (selectedCategory === '' || selectedCategory === category) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+    
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+    
+                    var ipId = button.getAttribute('data-ip-id');
+                    var confirmDelete = confirm("Are you sure you want to delete this IP entry?");
+                    if (confirmDelete && ipId) {
+                        fetch('/delete/' + ipId, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                console.log('IP entry deleted successfully');
+                                window.location.reload();
+                            }
+                        });
+                    }
+                });
+            });
+    
+            // Sorting functionality
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                header.addEventListener('click', function () {
+                    const column = this.dataset.column;
+                    const order = this.dataset.order;
+                    const sortedRows = Array.from(rows);
+    
+                    const arrowUp = this.querySelector('.arrow-up');
+                    const arrowDown = this.querySelector('.arrow-down');
+    
+                    // Toggle sorting order
+                    this.dataset.order = order === 'asc' ? 'desc' : 'asc';
+    
+                    // Remove arrows from other headers
+                    document.querySelectorAll('.arrow-up').forEach(arrow => arrow.classList.remove('d-none'));
+                    document.querySelectorAll('.arrow-down').forEach(arrow => arrow.classList.remove('d-none'));
+    
+                    if (order === 'asc') {
+                        arrowUp.classList.remove('d-none');
+                        arrowDown.classList.add('d-none');
+                    } else {
+                        arrowUp.classList.add('d-none');
+                        arrowDown.classList.remove('d-none');
+                    }
+    
+                    // Sorting
+                    const sortedRowsArray = sortedRows.sort((a, b) => {
+                        const aValue = a.querySelector(`.${column}-cell`).textContent.trim();
+                        const bValue = b.querySelector(`.${column}-cell`).textContent.trim();
+    
+                        if (column === 'ip' || column === 'hostname' || column === 'category') {
+                            return order === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                        } else {
+                            return order === 'asc' ? parseFloat(aValue) - parseFloat(bValue) : parseFloat(bValue) - parseFloat(aValue);
+                        }
+                    });
+    
+                    // Reorder rows
+                    el.innerHTML = '';
+                    sortedRowsArray.forEach(row => el.appendChild(row));
+                });
+            });
+
+            const dragDropToggle = document.getElementById('drag-drop-toggle');
+
+            dragDropToggle.addEventListener('change', function () {
+                const isEnabled = this.checked;
+                if (isEnabled) {
+                    sortable.option("disabled", false);
+                } else {
+                    sortable.option("disabled", true);
+                }
+            });
+    
+            fetchLatestPingResults();
+        });
+    </script>
+    <style>
+        .arrow-up,
+        .arrow-down {
+            display: inline;
+            font-size: 10px;
+        }
+
+        .sortable-header {
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
+        }
+    </style>   
+</head>
+<body>
+{% include 'navbar.html' %}
+    <div class="container">
+        <h1 class="mt-5">Dashboard</h1>
+        <div class="input-group mt-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="category">Filter</label>
+            </div>
+            <select id="category-filter" class="form-control">
+                <option value="">All</option>
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+            <a href="{{ url_for('insert') }}" class="btn btn-primary ml-2">Add Host</a>
+        </div>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th scope="col" class="sortable-header" data-column="ip" data-order="asc">IP Address <span class="arrow-up">&#x25B2;</span><span class="arrow-down">&#x25BC;</span></th>
+                    <th scope="col" class="sortable-header" data-column="hostname" data-order="asc">Hostname <span class="arrow-up">&#x25B2;</span><span class="arrow-down">&#x25BC;</span></th>
+                    <th scope="col" class="sortable-header" data-column="category" data-order="asc">Category <span class="arrow-up">&#x25B2;</span><span class="arrow-down">&#x25BC;</span></th>
+                    <th scope="col" class="sortable-header" data-column="response-time" data-order="asc">Latency (ms) <span class="arrow-up">&#x25B2;</span><span class="arrow-down">&#x25BC;</span></th>
+                    <th scope="col">Last Checked</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ip-list">
+                {% for ip in ips %}
+                    <tr data-ip-id="{{ ip[0] }}" data-category="{{ ip[3] }}">
+                        <td class="ip-cell">{{ ip[1] }}</td>
+                        <td class="hostname-cell">{{ ip[2] }}</td>
+                        <td>{{ ip[3] }}</td>
+                        <td class="response-time-cell">{{ latest_ping_results[ip[0]]['response_time'] }}</td>
+                        <td class="timestamp-cell">{{ latest_ping_results[ip[0]]['timestamp'] }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_ip', ip_id=ip[0]) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('delete_ip', ip_id=ip[0]) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm delete-btn" data-ip-id="{{ ip[0] }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                            <a href="{{ url_for('view_ping_responses', ip_id=ip[0]) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-3 float-right d-flex align-items-center">
+            <label class="mr-2">Drag and Drop Sorting</label>
+            <label class="switch">
+                <input type="checkbox" id="drag-drop-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+</body>
+</html>
