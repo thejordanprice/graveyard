@@ -1,0 +1,24 @@
+/* style.css */
+body {
+  background-color: #f4f4f4;
+}
+.container {
+  margin-top: 20px;
+}
+.title-icon {
+  margin-right: 10px;
+}
+#phoneNumbersList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-gap: 10px;
+}
+.is-invalid {
+  border-color: red;
+}
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+  background-color: #f8f9fa;
+}
